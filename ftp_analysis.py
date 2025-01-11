@@ -146,7 +146,7 @@ def analyze_server_software(db_file, limit=10):
             'Cerberus FTP': re.compile(r'Cerberus\s+FTP\s+Server', re.IGNORECASE),
             'CrushFTP': re.compile(r'CrushFTP\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'pyftpdlib': re.compile(r'pyftpdlib\s+\d+\.\d+\.\d+', re.IGNORECASE),
-            'Bftpd': re.compile(r'\(bftpd', re.IGNORECASE),
+            'Bftpd': re.compile(r'(bftpd\s\d+\.\d+)|(\(bftpd\))', re.IGNORECASE),
             'zFTPServer': re.compile(r'zFTPServer\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'Rumpus': re.compile(r'Rumpus\s+FTP\s+Server', re.IGNORECASE),
             'SlimFTPd': re.compile(r'SlimFTPd\s+\d+\.\d+', re.IGNORECASE),
