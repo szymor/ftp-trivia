@@ -84,20 +84,42 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=10):
     try:
         # Load IP2Location database
         ip_ranges = load_ip2location_db(ip2location_file)
-        # Sort ranges for binary search
-        ip_ranges = dict(sorted(ip_ranges.items()))
+        # Convert to sorted list of tuples for efficient searching
+        sorted_ranges = sorted(ip_ranges.items())
+        range_keys = [r[0] for r in sorted_ranges]
+        range_values = [r[1] for r in sorted_ranges]
         
         conn = sqlite3.connect(db_file)
         cursor = conn.cursor()
 
-        # Get all IPs
-        cursor.execute("SELECT ip FROM ftp")
+        # Get sorted IPs directly from database
+        cursor.execute("SELECT ip FROM ftp ORDER BY ip")
         ips = cursor.fetchall()
 
-        # Count countries
+        # Count countries using optimized search
         country_counts = {}
+        range_idx = 0  # Track our position in the ranges
+        
         for (ip,) in ips:
-            country = find_country_for_ip(ip, ip_ranges)
+            ip_int = ip  # IP is already in integer form
+            # Find the matching range using linear search optimized for sorted data
+            while range_idx < len(range_keys):
+                start, end = range_keys[range_idx]
+                if ip_int < start:
+                    # IP is before current range, no match
+                    country = "Unknown"
+                    break
+                elif ip_int <= end:
+                    # IP is within current range
+                    country = range_values[range_idx]
+                    break
+                else:
+                    # IP is after current range, move to next range
+                    range_idx += 1
+            else:
+                # Exhausted all ranges
+                country = "Unknown"
+            
             country_counts[country] = country_counts.get(country, 0) + 1
 
         # Get top countries
