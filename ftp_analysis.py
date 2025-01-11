@@ -124,32 +124,49 @@ def analyze_server_software(db_file, limit=10):
     try:
         # Common FTP server patterns
         server_patterns = {
-            'vsFTPd': re.compile(r'vsFTPd\s+\d+\.\d+\.\d+', re.IGNORECASE),
+            'Pure-FTPd': re.compile(r'(Pure-FTPd)|(220-You\sare\suser\snumber\s\d+\sof\s\d+\sallowed\.)', re.IGNORECASE),
             'ProFTPD': re.compile(r'ProFTPD', re.IGNORECASE),
-            'Pure-FTPd': re.compile(r'Pure-FTPd', re.IGNORECASE),
-            'FileZilla': re.compile(r'FileZilla\s+Server\s+\d+\.\d+\.\d+', re.IGNORECASE),
+            'vsFTPd': re.compile(r'(vsFTPd)|(blah FTP service\.)|(https://hub\.docker\.com/r/delfer/alpine-ftp-server/)', re.IGNORECASE),
             'Microsoft FTP': re.compile(r'Microsoft FTP Service', re.IGNORECASE),
-            'Wu-ftpd': re.compile(r'(?:wu-ftpd|wuftpd)\s+\d+\.\d+\.\d+', re.IGNORECASE),
-            'Titan FTP': re.compile(r'Titan\s+FTP\s+Server', re.IGNORECASE),
+            'FileZilla': re.compile(r'FileZilla\s+Server', re.IGNORECASE),
+            'Idea FTP Server': re.compile(r'Idea\s+FTP\s+Server', re.IGNORECASE),
+            'MikroTik': re.compile(r'MikroTik', re.IGNORECASE),
+            'net.cn': re.compile(r'www\.net\.cn', re.IGNORECASE),
+            'GNU inetutils': re.compile(r'(?:GNU\s+inetutils|inetutils-ftpd)\s+\d+\.\d+', re.IGNORECASE),
+            'ipTIME': re.compile(r'ipTIME_FTPD\s+\d+\.\d+', re.IGNORECASE),
+            'DreamHost': re.compile(r'^220 DreamHost FTP Server$', re.IGNORECASE),
             'Serv-U': re.compile(r'Serv-U\s+FTP\s+Server', re.IGNORECASE),
+            'Firmware Update Utility': re.compile(r'^220 Ftp firmware update utility$', re.IGNORECASE),
+            'Virtual FTP Service': re.compile(r'^220 Welcome to virtual FTP service\.$', re.IGNORECASE),
+            'Asus': re.compile(r'^220 Welcome to ASUS', re.IGNORECASE),
+            'TP-Link': re.compile(r'TP-L(INK)|(ink) FTP', re.IGNORECASE),
+            'Multicraft': re.compile(r'Multicraft\s+\d+\.\d+\.\d+', re.IGNORECASE),
+            'Firewall\'d': re.compile(r'^220 Firewall Authentication required before proceeding with service$', re.IGNORECASE),
+            'Titan FTP': re.compile(r'Titan\s+FTP\s+Server', re.IGNORECASE),
             'Cerberus FTP': re.compile(r'Cerberus\s+FTP\s+Server', re.IGNORECASE),
-            'GlFTPd': re.compile(r'glFTPd\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'CrushFTP': re.compile(r'CrushFTP\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'pyftpdlib': re.compile(r'pyftpdlib\s+\d+\.\d+\.\d+', re.IGNORECASE),
-            'Bftpd': re.compile(r'bftpd\s+\d+\.\d+\.\d+', re.IGNORECASE),
+            'Bftpd': re.compile(r'\(bftpd', re.IGNORECASE),
             'zFTPServer': re.compile(r'zFTPServer\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'Rumpus': re.compile(r'Rumpus\s+FTP\s+Server', re.IGNORECASE),
+            'SlimFTPd': re.compile(r'SlimFTPd\s+\d+\.\d+', re.IGNORECASE),
             'Xlight FTP': re.compile(r'Xlight\s+FTP\s+Server', re.IGNORECASE),
-            'IIS FTP': re.compile(r'Microsoft-IIS/\d+\.\d+', re.IGNORECASE),
             'WS_FTP': re.compile(r'WS_FTP\s+Server', re.IGNORECASE),
             'Gene6 FTP': re.compile(r'Gene6\s+FTP\s+Server', re.IGNORECASE),
             'RaidenFTPD': re.compile(r'RaidenFTPD\s+\d+\.\d+\.\d+', re.IGNORECASE),
-            'BlackMoon FTP': re.compile(r'BlackMoon\s+FTP\s+Server', re.IGNORECASE),
             'CompleteFTP': re.compile(r'CompleteFTP\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'Core FTP': re.compile(r'Core\s+FTP\s+Server', re.IGNORECASE),
-            'GNU inetutils': re.compile(r'(?:GNU\s+inetutils|inetutils-ftpd)\s+\d+\.\d+', re.IGNORECASE),
-            'Idea FTP Server': re.compile(r'Idea\s+FTP\s+Server', re.IGNORECASE),
-            'MikroTik FTP': re.compile(r'MikroTik\s+FTP\s+Server', re.IGNORECASE),
+            'Nucleus': re.compile(r'Nucleus FTP Server', re.IGNORECASE),
+            'BulletProof': re.compile(r'BulletProof FTP Server', re.IGNORECASE),
+            'Wing': re.compile(r'Wing FTP Server', re.IGNORECASE),
+            'Hostgator': re.compile(r'Hostgator', re.IGNORECASE),
+            'A7Emailing': re.compile(r'A7Emailing', re.IGNORECASE),
+            'Cafe24': re.compile(r'(Cafe24 FTP Server Ready)|(Welcome to CAFE24 FTP Server)', re.IGNORECASE),
+            'IServ': re.compile(r'^220 IServ$', re.IGNORECASE),
+            'Arvixe': re.compile(r'^220 Arvixe$', re.IGNORECASE),
+            'ZXR10': re.compile(r'^220 ZXR10 ftp service ready for new user\.$', re.IGNORECASE),
+            'Quick \'n Easy FTP Server': re.compile(r'Quick \'n Easy FTP Server', re.IGNORECASE),
+            #'Generic': re.compile(r'(^220 FTP service ready\.$)|(^220 FTP S|server R|ready(\.)?$)|(^220 FTP Server$)|(^220 FTP-Server$)|(^220 Welcome! Please note that all activity is logged.$)|(^220 \.$)|(^220 Welcome to FTP service\.$)|(^220 FTP (OK)$)|(^220 Operation successful$)', re.IGNORECASE),
         }
         
         conn = sqlite3.connect(db_file)
@@ -176,7 +193,7 @@ def analyze_server_software(db_file, limit=10):
             
             if not detected:
                 unknown_count += 1
-                print(f"Unknown server banner: {message}")
+                #print(f"Unknown server banner: {message}")
 
         # Add unknown count if any
         if unknown_count > 0:
