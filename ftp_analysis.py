@@ -67,6 +67,7 @@ def find_country_for_ip(ip, ip_ranges):
 
 def analyze_geographical_distribution(db_file, ip2location_file, limit=10):
     """Analyze and display geographical distribution using IP2Location"""
+    conn = None
     try:
         # Load IP2Location database
         ip_ranges = load_ip2location_db(ip2location_file)
