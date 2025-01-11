@@ -174,6 +174,7 @@ def analyze_server_software(db_file, limit=10):
             
             if not detected:
                 unknown_count += 1
+                print(f"Unknown server banner: {message}")
 
         # Add unknown count if any
         if unknown_count > 0:
