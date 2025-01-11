@@ -162,6 +162,7 @@ def analyze_server_software(db_file, limit=10):
             'FTPx': re.compile(r'FTPx\s+Server', re.IGNORECASE),
             'FTPy': re.compile(r'FTPy\s+Server', re.IGNORECASE),
             'FTPz': re.compile(r'FTPz\s+Server', re.IGNORECASE),
+            'GNU inetutils': re.compile(r'(?:GNU\s+inetutils|inetutils-ftpd)\s+\d+\.\d+', re.IGNORECASE),
         }
         
         conn = sqlite3.connect(db_file)
