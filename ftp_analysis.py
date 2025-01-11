@@ -129,7 +129,6 @@ def analyze_server_software(db_file, limit=10):
             'Pure-FTPd': re.compile(r'Pure-FTPd\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'FileZilla': re.compile(r'FileZilla\s+Server\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'Microsoft FTP': re.compile(r'Microsoft FTP Service', re.IGNORECASE),
-            # Additional patterns
             'Wu-ftpd': re.compile(r'(?:wu-ftpd|wuftpd)\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'Titan FTP': re.compile(r'Titan\s+FTP\s+Server', re.IGNORECASE),
             'Serv-U': re.compile(r'Serv-U\s+FTP\s+Server', re.IGNORECASE),
