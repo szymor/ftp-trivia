@@ -221,6 +221,49 @@ def analyze_server_software(db_file, limit=10):
         if conn:
             conn.close()
 
+def detect_worm_infections(db_file):
+    """Detect and display statistics about potential worm infections"""
+    try:
+        # Connect to the SQLite database
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+
+        # Check for worm infection files using pattern matching
+        query = """
+        SELECT 
+            COUNT(*) AS total_hosts,
+            SUM(CASE WHEN listing LIKE '%AV.scr%' OR 
+                        listing LIKE '%Photo.scr%' OR 
+                        listing LIKE '%Video.scr%' OR
+                        listing LIKE '%AV.%.scr%' OR
+                        listing LIKE '%Photo.%.scr%' OR
+                        listing LIKE '%Video.%.scr%' THEN 1 ELSE 0 END) AS infected_hosts,
+            ROUND(100.0 * SUM(CASE WHEN listing LIKE '%AV.scr%' OR 
+                        listing LIKE '%Photo.scr%' OR 
+                        listing LIKE '%Video.scr%' OR
+                        listing LIKE '%AV.%.scr%' OR
+                        listing LIKE '%Photo.%.scr%' OR
+                        listing LIKE '%Video.%.scr%' THEN 1 ELSE 0 END) / COUNT(*), 2) AS infection_percent
+        FROM ftp;
+        """
+        cursor.execute(query)
+        result = cursor.fetchone()
+
+        # Format and display the results
+        if result:
+            headers = ["Total Hosts", "Infected Hosts", "Percentage"]
+            data = [result]
+            print("\nWorm Infection Statistics:")
+            print(tabulate(data, headers=headers, tablefmt="pretty"))
+        else:
+            print("No data found in the database.")
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+    finally:
+        if conn:
+            conn.close()
+
 def calculate_anonymous_access(db_file):
     """Calculate and display anonymous access statistics"""
     try:
@@ -273,6 +316,7 @@ def main():
     #analyze_welcome_messages(args.database, args.welcome_limit)
     #analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit)
     analyze_server_software(args.database, args.software_limit)
+    detect_worm_infections(args.database)
 
 if __name__ == "__main__":
     main()
