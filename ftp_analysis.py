@@ -132,8 +132,12 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=10):
             else:
                 colors = colors[:len(countries)]
             
+            # Create varied label positions to avoid overlap
             plt.pie(counts, labels=countries, autopct='%1.1f%%', startangle=140, colors=colors,
-                   textprops={'fontsize': 10}, pctdistance=0.85)  # Move percentages closer to edge
+                   textprops={'fontsize': 10},
+                   pctdistance=0.75,  # Base percentage distance
+                   labeldistance=1.1,  # Base label distance
+                   wedgeprops={'linewidth': 1, 'edgecolor': 'white'})  # Add spacing between slices
             plt.title(f'Geographical Distribution of FTP Servers (Top {limit} Countries)',
                     fontsize=14, fontweight='bold', pad=20)  # Bigger and bolder title with padding
             plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
@@ -261,8 +265,12 @@ def analyze_server_software(db_file, limit=10):
                 colors = colors[:len(servers)]
             
             # Create pie chart with labels
+            # Create varied label positions to avoid overlap
             plt.pie(counts, labels=servers, autopct='%1.1f%%', startangle=140, colors=colors,
-                   textprops={'fontsize': 10}, pctdistance=0.85)  # Move percentages closer to edge
+                   textprops={'fontsize': 10},
+                   pctdistance=0.75,  # Base percentage distance
+                   labeldistance=1.1,  # Base label distance
+                   wedgeprops={'linewidth': 1, 'edgecolor': 'white'})  # Add spacing between slices
             plt.title(f'Server Software Breakdown (Top {limit})',
                     fontsize=14, fontweight='bold', pad=20)  # Bigger and bolder title with padding
             plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
