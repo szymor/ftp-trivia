@@ -40,8 +40,21 @@ def load_ip2location_db(ip2location_file):
     ip_ranges = {}
     with open(ip2location_file, 'r') as f:
         for line in f:
-            start_ip, end_ip, country_code, country_name = line.strip().split(',')
-            ip_ranges[(int(start_ip), int(end_ip))] = country_name
+            # Remove quotes and split
+            cleaned_line = line.strip().replace('"', '')
+            parts = cleaned_line.split(',')
+            
+            # We need at least start_ip, end_ip, and country_name
+            if len(parts) >= 4:
+                start_ip = parts[0]
+                end_ip = parts[1]
+                # Country name is typically the last column
+                country_name = parts[-1]
+                
+                try:
+                    ip_ranges[(int(start_ip), int(end_ip))] = country_name
+                except (ValueError, IndexError):
+                    continue  # Skip malformed lines
     return ip_ranges
 
 def ip_to_int(ip):
