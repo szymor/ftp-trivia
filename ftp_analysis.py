@@ -125,7 +125,7 @@ def analyze_server_software(db_file, limit=10):
         # Common FTP server patterns
         server_patterns = {
             'vsFTPd': re.compile(r'vsFTPd\s+\d+\.\d+\.\d+', re.IGNORECASE),
-            'ProFTPD': re.compile(r'ProFTPD\s+\d+\.\d+\.\d+', re.IGNORECASE),
+            'ProFTPD': re.compile(r'ProFTPD', re.IGNORECASE),
             'Pure-FTPd': re.compile(r'Pure-FTPd\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'FileZilla': re.compile(r'FileZilla\s+Server\s+\d+\.\d+\.\d+', re.IGNORECASE),
             'Microsoft FTP': re.compile(r'Microsoft FTP Service', re.IGNORECASE),
