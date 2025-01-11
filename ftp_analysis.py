@@ -133,7 +133,7 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=10):
                 colors = colors[:len(countries)]
             
             plt.pie(counts, labels=countries, autopct='%1.1f%%', startangle=140, colors=colors,
-                   textprops={'fontsize': 10})  # Set font size for labels
+                   textprops={'fontsize': 10}, pctdistance=0.85)  # Move percentages closer to edge
             plt.title(f'Geographical Distribution of FTP Servers (Top {limit} Countries)',
                     fontsize=14, fontweight='bold', pad=20)  # Bigger and bolder title with padding
             plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
@@ -262,7 +262,7 @@ def analyze_server_software(db_file, limit=10):
             
             # Create pie chart with labels
             plt.pie(counts, labels=servers, autopct='%1.1f%%', startangle=140, colors=colors,
-                   textprops={'fontsize': 10})  # Set font size for labels and percentages
+                   textprops={'fontsize': 10}, pctdistance=0.85)  # Move percentages closer to edge
             plt.title(f'Server Software Breakdown (Top {limit})',
                     fontsize=14, fontweight='bold', pad=20)  # Bigger and bolder title with padding
             plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
