@@ -149,6 +149,7 @@ def analyze_server_software(db_file, limit=10):
             'Core FTP': re.compile(r'Core\s+FTP\s+Server', re.IGNORECASE),
             'GNU inetutils': re.compile(r'(?:GNU\s+inetutils|inetutils-ftpd)\s+\d+\.\d+', re.IGNORECASE),
             'Idea FTP Server': re.compile(r'Idea\s+FTP\s+Server', re.IGNORECASE),
+            'MikroTik FTP': re.compile(r'MikroTik\s+FTP\s+Server', re.IGNORECASE),
         }
         
         conn = sqlite3.connect(db_file)
