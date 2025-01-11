@@ -231,19 +231,22 @@ def detect_worm_infections(db_file):
         # Check for worm infection files using pattern matching
         query = """
         SELECT 
-            COUNT(*) AS total_hosts,
-            SUM(CASE WHEN listing LIKE '%AV.scr%' OR 
+            SUM(CASE WHEN anon = 1 THEN 1 ELSE 0 END) AS anon_hosts,
+            SUM(CASE WHEN anon = 1 AND (
+                        listing LIKE '%AV.scr%' OR 
                         listing LIKE '%Photo.scr%' OR 
                         listing LIKE '%Video.scr%' OR
                         listing LIKE '%AV.%.scr%' OR
                         listing LIKE '%Photo.%.scr%' OR
-                        listing LIKE '%Video.%.scr%' THEN 1 ELSE 0 END) AS infected_hosts,
-            ROUND(100.0 * SUM(CASE WHEN listing LIKE '%AV.scr%' OR 
+                        listing LIKE '%Video.%.scr%') THEN 1 ELSE 0 END) AS infected_hosts,
+            ROUND(100.0 * SUM(CASE WHEN anon = 1 AND (
+                        listing LIKE '%AV.scr%' OR 
                         listing LIKE '%Photo.scr%' OR 
                         listing LIKE '%Video.scr%' OR
                         listing LIKE '%AV.%.scr%' OR
                         listing LIKE '%Photo.%.scr%' OR
-                        listing LIKE '%Video.%.scr%' THEN 1 ELSE 0 END) / COUNT(*), 2) AS infection_percent
+                        listing LIKE '%Video.%.scr%') THEN 1 ELSE 0 END) / 
+                  SUM(CASE WHEN anon = 1 THEN 1 ELSE 0 END), 2) AS infection_percent
         FROM ftp;
         """
         cursor.execute(query)
@@ -251,7 +254,7 @@ def detect_worm_infections(db_file):
 
         # Format and display the results
         if result:
-            headers = ["Total Hosts", "Infected Hosts", "Percentage"]
+            headers = ["Anonymous Hosts", "Infected Hosts", "Percentage"]
             data = [result]
             print("\nWorm Infection Statistics:")
             print(tabulate(data, headers=headers, tablefmt="pretty"))
