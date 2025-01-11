@@ -3,6 +3,38 @@ import sqlite3
 import argparse
 from tabulate import tabulate
 
+def analyze_welcome_messages(db_file, limit=10):
+    """Analyze and display most common FTP welcome messages"""
+    try:
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+
+        # Execute the query to get most common welcome messages
+        query = """
+        SELECT welcome, COUNT(*) AS count
+        FROM ftp
+        WHERE welcome IS NOT NULL
+        GROUP BY welcome
+        ORDER BY count DESC
+        LIMIT ?;
+        """
+        cursor.execute(query, (limit,))
+        results = cursor.fetchall()
+
+        # Format and display the results
+        if results:
+            headers = ["Welcome Message", "Count"]
+            print("\nMost Common Welcome Messages:")
+            print(tabulate(results, headers=headers, tablefmt="pretty"))
+        else:
+            print("No welcome messages found in the database.")
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+    finally:
+        if conn:
+            conn.close()
+
 def calculate_anonymous_access(db_file):
     """Calculate and display anonymous access statistics"""
     try:
@@ -38,12 +70,15 @@ def calculate_anonymous_access(db_file):
 
 def main():
     # Set up argument parsing
-    parser = argparse.ArgumentParser(description="Analyze FTP server anonymous access statistics")
+    parser = argparse.ArgumentParser(description="Analyze FTP server statistics")
     parser.add_argument("database", help="Path to SQLite database file")
+    parser.add_argument("--welcome-limit", type=int, default=10,
+                       help="Number of top welcome messages to display (default: 10)")
     args = parser.parse_args()
 
     # Calculate and display statistics
     calculate_anonymous_access(args.database)
+    analyze_welcome_messages(args.database, args.welcome_limit)
 
 if __name__ == "__main__":
     main()
