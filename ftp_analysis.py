@@ -35,6 +35,39 @@ def analyze_welcome_messages(db_file, limit=10):
         if conn:
             conn.close()
 
+def analyze_geographical_distribution(db_file, limit=10):
+    """Analyze and display geographical distribution based on IP first octet"""
+    try:
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+
+        # Execute the query to get IP distribution
+        query = """
+        SELECT 
+            SUBSTR(ip, 1, INSTR(ip, '.') - 1) AS first_octet,
+            COUNT(*) AS count
+        FROM ftp
+        GROUP BY first_octet
+        ORDER BY count DESC
+        LIMIT ?;
+        """
+        cursor.execute(query, (limit,))
+        results = cursor.fetchall()
+
+        # Format and display the results
+        if results:
+            headers = ["IP First Octet", "Host Count"]
+            print("\nGeographical Distribution (Top IP Ranges):")
+            print(tabulate(results, headers=headers, tablefmt="pretty"))
+        else:
+            print("No IP data found in the database.")
+
+    except sqlite3.Error as e:
+        print(f"Database error: {e}")
+    finally:
+        if conn:
+            conn.close()
+
 def calculate_anonymous_access(db_file):
     """Calculate and display anonymous access statistics"""
     try:
@@ -74,11 +107,14 @@ def main():
     parser.add_argument("database", help="Path to SQLite database file")
     parser.add_argument("--welcome-limit", type=int, default=10,
                        help="Number of top welcome messages to display (default: 10)")
+    parser.add_argument("--geo-limit", type=int, default=10,
+                       help="Number of top IP ranges to display (default: 10)")
     args = parser.parse_args()
 
     # Calculate and display statistics
     calculate_anonymous_access(args.database)
     analyze_welcome_messages(args.database, args.welcome_limit)
+    analyze_geographical_distribution(args.database, args.geo_limit)
 
 if __name__ == "__main__":
     main()
