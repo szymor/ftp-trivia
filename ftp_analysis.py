@@ -202,19 +202,19 @@ def analyze_server_software(db_file, limit=10):
         # Sort all servers by count
         sorted_servers = sorted(server_counts.items(), key=lambda x: x[1], reverse=True)
         
-        # If we have more servers than limit-1, group the rest under "Others"
-        if len(sorted_servers) > limit - 1:
-            top_servers = sorted_servers[:limit - 1]
-            others_count = sum(count for _, count in sorted_servers[limit - 1:])
-            top_servers.append(('Others', others_count))
-        else:
-            top_servers = sorted_servers
+        # If we have more servers than limit, group the rest under "Others"
+        if len(sorted_servers) > limit:
+            others_count = sum(count for _, count in sorted_servers[limit:])
+            sorted_servers = sorted_servers[:limit]
+            sorted_servers.append(('Others', others_count))
+            # Re-sort with Others included
+            sorted_servers = sorted(sorted_servers, key=lambda x: x[1], reverse=True)
 
         # Format and display the results
-        if top_servers:
+        if sorted_servers:
             headers = ["Server Software", "Count"]
-            print(f"\nServer Software Breakdown (Top {limit - 1} + Others):")
-            print(tabulate(top_servers, headers=headers, tablefmt="pretty"))
+            print(f"\nServer Software Breakdown (Top {limit}):")
+            print(tabulate(sorted_servers, headers=headers, tablefmt="pretty"))
         else:
             print("No server software information found.")
 
