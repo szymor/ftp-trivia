@@ -246,6 +246,38 @@ def analyze_server_software(db_file, limit=10):
             headers = ["Server Software", "Count"]
             print(f"\nServer Software Breakdown (Top {limit}):")
             print(tabulate(sorted_servers, headers=headers, tablefmt="pretty"))
+
+            # Generate pie chart with distinct colors
+            servers, counts = zip(*sorted_servers)
+            plt.figure(figsize=(10, 8))
+            
+            # Use a colormap with enough distinct colors
+            colors = plt.cm.tab20.colors  # tab20 colormap has 20 distinct colors
+            if len(servers) > 20:
+                # If more than 20 categories, cycle through the colors
+                colors = [colors[i % 20] for i in range(len(servers))]
+            else:
+                colors = colors[:len(servers)]
+            
+            # Create pie chart without labels
+            wedges, texts, autotexts = plt.pie(counts, autopct='%1.1f%%', startangle=140, colors=colors,
+                   textprops={'fontsize': 10})  # Set font size for percentages
+            plt.title(f'Server Software Breakdown (Top {limit})',
+                    fontsize=14, fontweight='bold')  # Bigger and bolder title
+            plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+            
+            # Create legend with server names and counts
+            legend_labels = [f'{server} ({count})' for server, count in zip(servers, counts)]
+            plt.legend(wedges, legend_labels, 
+                      title="Server Software",
+                      loc="center left", 
+                      bbox_to_anchor=(1, 0, 0.5, 1))
+            
+            plt.tight_layout()
+            
+            # Save and show the plot
+            plt.savefig('server_software.png')
+            plt.show()
         else:
             print("No server software information found.")
 
