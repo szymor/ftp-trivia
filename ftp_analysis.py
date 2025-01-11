@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sqlite3
 import argparse
+import re
 from tabulate import tabulate
 
 def analyze_welcome_messages(db_file, limit=10):
@@ -118,6 +119,64 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=10):
         if conn:
             conn.close()
 
+def analyze_server_software(db_file, limit=10):
+    """Analyze and display server software breakdown"""
+    try:
+        # Common FTP server patterns
+        server_patterns = {
+            'vsFTPd': re.compile(r'vsFTPd\s+\d+\.\d+\.\d+', re.IGNORECASE),
+            'ProFTPD': re.compile(r'ProFTPD\s+\d+\.\d+\.\d+', re.IGNORECASE),
+            'Pure-FTPd': re.compile(r'Pure-FTPd\s+\d+\.\d+\.\d+', re.IGNORECASE),
+            'FileZilla': re.compile(r'FileZilla\s+Server\s+\d+\.\d+\.\d+', re.IGNORECASE),
+            'Microsoft FTP': re.compile(r'Microsoft FTP Service', re.IGNORECASE),
+        }
+        
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+
+        # Get all welcome messages
+        cursor.execute("SELECT welcome FROM ftp WHERE welcome IS NOT NULL")
+        messages = cursor.fetchall()
+
+        # Count server software
+        server_counts = {}
+        unknown_count = 0
+        
+        for (message,) in messages:
+            if not message:
+                continue
+                
+            detected = False
+            for name, pattern in server_patterns.items():
+                if pattern.search(message):
+                    server_counts[name] = server_counts.get(name, 0) + 1
+                    detected = True
+                    break
+            
+            if not detected:
+                unknown_count += 1
+
+        # Add unknown count if any
+        if unknown_count > 0:
+            server_counts['Unknown'] = unknown_count
+
+        # Get top servers
+        sorted_servers = sorted(server_counts.items(), key=lambda x: x[1], reverse=True)[:limit]
+
+        # Format and display the results
+        if sorted_servers:
+            headers = ["Server Software", "Count"]
+            print("\nServer Software Breakdown:")
+            print(tabulate(sorted_servers, headers=headers, tablefmt="pretty"))
+        else:
+            print("No server software information found.")
+
+    except Exception as e:
+        print(f"Error analyzing server software: {e}")
+    finally:
+        if conn:
+            conn.close()
+
 def calculate_anonymous_access(db_file):
     """Calculate and display anonymous access statistics"""
     try:
@@ -161,12 +220,15 @@ def main():
                        help="Number of top countries to display (default: 10)")
     parser.add_argument("--ip2location", required=True,
                        help="Path to IP2Location LITE DB1 CSV file")
+    parser.add_argument("--software-limit", type=int, default=10,
+                       help="Number of top server software to display (default: 10)")
     args = parser.parse_args()
 
     # Calculate and display statistics
-    #calculate_anonymous_access(args.database)
-    #analyze_welcome_messages(args.database, args.welcome_limit)
-    #analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit)
+    calculate_anonymous_access(args.database)
+    analyze_welcome_messages(args.database, args.welcome_limit)
+    analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit)
+    analyze_server_software(args.database, args.software_limit)
 
 if __name__ == "__main__":
     main()
