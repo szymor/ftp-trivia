@@ -64,7 +64,7 @@ def ip_to_int(ip):
 
 def find_country_for_ip(ip, ip_ranges):
     """Find country for given IP using binary search"""
-    ip_int = ip_to_int(ip)
+    ip_int = ip # ip is already in int
     # Binary search through sorted ranges
     low, high = 0, len(ip_ranges) - 1
     while low <= high:
