@@ -341,8 +341,8 @@ def main():
     #calculate_anonymous_access(args.database)
     #detect_worm_infections(args.database)
     #analyze_welcome_messages(args.database, args.welcome_limit)
-    #analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit)
-    analyze_server_software(args.database, args.software_limit)
+    analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit)
+    #analyze_server_software(args.database, args.software_limit)
 
 if __name__ == "__main__":
     main()
