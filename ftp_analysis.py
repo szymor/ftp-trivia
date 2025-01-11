@@ -120,10 +120,19 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=10):
             print(f"\nGeographical Distribution (Top {limit} Countries):")
             print(tabulate(sorted_countries, headers=headers, tablefmt="pretty"))
 
-            # Generate pie chart
+            # Generate pie chart with distinct colors
             countries, counts = zip(*sorted_countries)
             plt.figure(figsize=(10, 8))
-            plt.pie(counts, labels=countries, autopct='%1.1f%%', startangle=140)
+            
+            # Use a colormap with enough distinct colors
+            colors = plt.cm.tab20.colors  # tab20 colormap has 20 distinct colors
+            if len(countries) > 20:
+                # If more than 20 categories, cycle through the colors
+                colors = [colors[i % 20] for i in range(len(countries))]
+            else:
+                colors = colors[:len(countries)]
+            
+            plt.pie(counts, labels=countries, autopct='%1.1f%%', startangle=140, colors=colors)
             plt.title(f'Geographical Distribution of FTP Servers (Top {limit} Countries)')
             plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
             plt.tight_layout()
