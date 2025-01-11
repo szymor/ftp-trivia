@@ -200,19 +200,21 @@ def analyze_server_software(db_file, limit=10):
                 unknown_count += 1
                 #print(f"Unknown server banner: {message}")
 
-        # Add unknown count if any
-        if unknown_count > 0:
-            server_counts['Unknown'] = unknown_count
-
         # Sort all servers by count
         sorted_servers = sorted(server_counts.items(), key=lambda x: x[1], reverse=True)
         
-        # If we have more servers than limit, group the rest under "Others"
+        # Calculate combined Others/Unknown count
+        others_unknown_count = unknown_count
+        
+        # If we have more servers than limit, group the rest under Others/Unknown
         if len(sorted_servers) > limit:
-            others_count = sum(count for _, count in sorted_servers[limit:])
+            others_unknown_count += sum(count for _, count in sorted_servers[limit:])
             sorted_servers = sorted_servers[:limit]
-            sorted_servers.append(('Others', others_count))
-            # Re-sort with Others included
+        
+        # Add combined Others/Unknown category if there are any
+        if others_unknown_count > 0:
+            sorted_servers.append(('Others/Unknown', others_unknown_count))
+            # Re-sort with Others/Unknown included
             sorted_servers = sorted(sorted_servers, key=lambda x: x[1], reverse=True)
 
         # Format and display the results
