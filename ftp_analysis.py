@@ -3,6 +3,7 @@ import sqlite3
 import argparse
 import re
 from tabulate import tabulate
+import matplotlib.pyplot as plt
 
 def analyze_welcome_messages(db_file, limit=10):
     """Analyze and display most common FTP welcome messages"""
@@ -118,6 +119,18 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=10):
             headers = ["Country", "Host Count"]
             print(f"\nGeographical Distribution (Top {limit} Countries):")
             print(tabulate(sorted_countries, headers=headers, tablefmt="pretty"))
+
+            # Generate pie chart
+            countries, counts = zip(*sorted_countries)
+            plt.figure(figsize=(10, 8))
+            plt.pie(counts, labels=countries, autopct='%1.1f%%', startangle=140)
+            plt.title(f'Geographical Distribution of FTP Servers (Top {limit} Countries)')
+            plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+            plt.tight_layout()
+            
+            # Save and show the plot
+            plt.savefig('geo_distribution.png')
+            plt.show()
         else:
             print("No IP data found in the database.")
 
