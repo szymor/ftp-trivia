@@ -103,12 +103,20 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=10):
             country_counts[country] = country_counts.get(country, 0) + 1
 
         # Get top countries
-        sorted_countries = sorted(country_counts.items(), key=lambda x: x[1], reverse=True)[:limit]
+        sorted_countries = sorted(country_counts.items(), key=lambda x: x[1], reverse=True)
+        
+        # If we have more countries than limit, group the rest under "Others"
+        if len(sorted_countries) > limit:
+            others_count = sum(count for _, count in sorted_countries[limit:])
+            sorted_countries = sorted_countries[:limit]
+            sorted_countries.append(('Others', others_count))
+            # Re-sort with Others included
+            sorted_countries = sorted(sorted_countries, key=lambda x: x[1], reverse=True)
 
         # Format and display the results
         if sorted_countries:
             headers = ["Country", "Host Count"]
-            print("\nGeographical Distribution (Top Countries):")
+            print(f"\nGeographical Distribution (Top {limit} Countries):")
             print(tabulate(sorted_countries, headers=headers, tablefmt="pretty"))
         else:
             print("No IP data found in the database.")
