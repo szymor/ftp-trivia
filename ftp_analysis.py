@@ -57,27 +57,6 @@ def load_ip2location_db(ip2location_file):
                     continue  # Skip malformed lines
     return ip_ranges
 
-def ip_to_int(ip):
-    """Convert IP address to integer"""
-    octets = list(map(int, ip.split('.')))
-    return (octets[0] << 24) | (octets[1] << 16) | (octets[2] << 8) | octets[3]
-
-def find_country_for_ip(ip, ip_ranges):
-    """Find country for given IP using binary search"""
-    ip_int = ip # ip is already in int
-    # Binary search through sorted ranges
-    low, high = 0, len(ip_ranges) - 1
-    while low <= high:
-        mid = (low + high) // 2
-        start, end = list(ip_ranges.keys())[mid]
-        if start <= ip_int <= end:
-            return ip_ranges[(start, end)]
-        elif ip_int < start:
-            high = mid - 1
-        else:
-            low = mid + 1
-    return "Unknown"
-
 def analyze_geographical_distribution(db_file, ip2location_file, limit=10):
     """Analyze and display geographical distribution using IP2Location"""
     conn = None
@@ -187,7 +166,7 @@ def main():
     # Calculate and display statistics
     #calculate_anonymous_access(args.database)
     #analyze_welcome_messages(args.database, args.welcome_limit)
-    analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit)
+    #analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit)
 
 if __name__ == "__main__":
     main()
