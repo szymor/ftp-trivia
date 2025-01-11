@@ -149,8 +149,8 @@ def main():
     args = parser.parse_args()
 
     # Calculate and display statistics
-    calculate_anonymous_access(args.database)
-    analyze_welcome_messages(args.database, args.welcome_limit)
+    #calculate_anonymous_access(args.database)
+    #analyze_welcome_messages(args.database, args.welcome_limit)
     analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit)
 
 if __name__ == "__main__":
