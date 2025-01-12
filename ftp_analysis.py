@@ -59,7 +59,7 @@ def load_ip2location_db(ip2location_file):
                     continue  # Skip malformed lines
     return ip_ranges
 
-def analyze_geographical_distribution(db_file, ip2location_file, limit=10):
+def analyze_geographical_distribution(db_file, ip2location_file, limit=15):
     """Analyze and display geographical distribution using IP2Location"""
     conn = None
     try:
@@ -374,8 +374,8 @@ def main():
     parser.add_argument("database", help="Path to SQLite database file")
     parser.add_argument("--welcome-limit", type=int, default=10,
                        help="Number of top welcome messages to display (default: 10)")
-    parser.add_argument("--geo-limit", type=int, default=10,
-                       help="Number of top countries to display (default: 10)")
+    parser.add_argument("--geo-limit", type=int, default=15,
+                       help="Number of top countries to display (default: 15)")
     parser.add_argument("--ip2location", required=True,
                        help="Path to IP2Location LITE DB1 CSV file")
     parser.add_argument("--software-limit", type=int, default=10,
