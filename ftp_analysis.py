@@ -355,10 +355,32 @@ def calculate_anonymous_access(db_file):
 
         # Format and display the results
         if result:
+            total_hosts, anon_hosts, anon_percent = result
+            non_anon_hosts = total_hosts - anon_hosts
+            
             headers = ["Total Hosts", "Anonymous Hosts", "Percentage"]
             data = [result]
             print("\nAnonymous Access Statistics:")
             print(tabulate(data, headers=headers, tablefmt="pretty"))
+
+            # Generate pie chart
+            labels = ['Anonymous Access', 'Non-Anonymous Access']
+            sizes = [anon_hosts, non_anon_hosts]
+            colors = ['#ff9999','#66b3ff']
+            
+            plt.figure(figsize=(8, 6))
+            plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
+                   startangle=90, textprops={'fontsize': 12},
+                   wedgeprops={'linewidth': 1, 'edgecolor': 'white'})
+            
+            plt.title('Anonymous Access Distribution', 
+                     fontsize=14, fontweight='bold', pad=20)
+            plt.axis('equal')
+            plt.tight_layout()
+            
+            # Save and show the plot
+            plt.savefig('anonymous_access.png')
+            plt.show()
         else:
             print("No data found in the database.")
 
@@ -383,9 +405,9 @@ def main():
     args = parser.parse_args()
 
     # Calculate and display statistics
-    #calculate_anonymous_access(args.database)
-    #detect_worm_infections(args.database)
-    #analyze_welcome_messages(args.database, args.welcome_limit)
+    calculate_anonymous_access(args.database)
+    detect_worm_infections(args.database)
+    analyze_welcome_messages(args.database, args.welcome_limit)
     analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit)
     analyze_server_software(args.database, args.software_limit)
 
