@@ -322,10 +322,32 @@ def detect_worm_infections(db_file):
 
         # Format and display the results
         if result:
+            anon_hosts, infected_hosts, infection_percent = result
+            non_infected_hosts = anon_hosts - infected_hosts
+            
             headers = ["Anonymous Hosts", "Infected Hosts", "Percentage"]
             data = [result]
             print("\nWorm Infection Statistics:")
             print(tabulate(data, headers=headers, tablefmt="pretty"))
+
+            # Generate pie chart
+            labels = ['Infected Hosts', 'Non-Infected Hosts']
+            sizes = [infected_hosts, non_infected_hosts]
+            colors = ['#ff9999','#66b3ff']
+            
+            plt.figure(figsize=(8, 6))
+            plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
+                   startangle=90, textprops={'fontsize': 12},
+                   wedgeprops={'linewidth': 1, 'edgecolor': 'white'})
+            
+            plt.title('Worm Infection Distribution Among Anonymous Hosts', 
+                     fontsize=14, fontweight='bold', pad=20)
+            plt.axis('equal')
+            plt.tight_layout()
+            
+            # Save and show the plot
+            plt.savefig('worm_infections.png')
+            plt.show()
         else:
             print("No data found in the database.")
 
