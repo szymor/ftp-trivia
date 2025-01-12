@@ -1,2 +1,10 @@
 .aider*
 .env
+*.png
+*.PNG
+*.zip
+*.ZIP
+*.csv
+*.CSV
+*.txt
+*.TXT

@@ -45,14 +45,14 @@ def load_ip2location_db(ip2location_file):
             # Remove quotes and split
             cleaned_line = line.strip().replace('"', '')
             parts = cleaned_line.split(',')
-            
+
             # We need at least start_ip, end_ip, and country_name
             if len(parts) >= 4:
                 start_ip = parts[0]
                 end_ip = parts[1]
                 # Country name is typically the last column
                 country_name = parts[-1]
-                
+
                 try:
                     ip_ranges[(int(start_ip), int(end_ip))] = country_name
                 except (ValueError, IndexError):
@@ -69,7 +69,7 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=15):
         sorted_ranges = sorted(ip_ranges.items())
         range_keys = [r[0] for r in sorted_ranges]
         range_values = [r[1] for r in sorted_ranges]
-        
+
         conn = sqlite3.connect(db_file)
         cursor = conn.cursor()
 
@@ -80,7 +80,7 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=15):
         # Count countries using optimized search
         country_counts = {}
         range_idx = 0  # Track our position in the ranges
-        
+
         for (ip,) in ips:
             ip_int = ip  # IP is already in integer form
             # Find the matching range using linear search optimized for sorted data
@@ -100,12 +100,12 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=15):
             else:
                 # Exhausted all ranges
                 country = "Unknown"
-            
+
             country_counts[country] = country_counts.get(country, 0) + 1
 
         # Get top countries
         sorted_countries = sorted(country_counts.items(), key=lambda x: x[1], reverse=True)
-        
+
         # If we have more countries than limit, group the rest under "Others"
         if len(sorted_countries) > limit:
             others_count = sum(count for _, count in sorted_countries[limit:])
@@ -123,7 +123,7 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=15):
             # Generate pie chart with distinct colors
             countries, counts = zip(*sorted_countries)
             plt.figure(figsize=(10, 8))
-            
+
             # Use a colormap with enough distinct colors
             colors = plt.cm.tab20.colors  # tab20 colormap has 20 distinct colors
             if len(countries) > 20:
@@ -131,7 +131,7 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=15):
                 colors = [colors[i % 20] for i in range(len(countries))]
             else:
                 colors = colors[:len(countries)]
-            
+
             # Create varied label positions to avoid overlap
             plt.pie(counts, labels=countries, autopct='%1.1f%%', startangle=140, colors=colors,
                    textprops={'fontsize': 10},
@@ -143,7 +143,7 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=15):
             plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
             plt.subplots_adjust(top=0.85)  # Add more space above the chart
             plt.tight_layout()
-            
+
             # Save and show the plot
             plt.savefig('geo_distribution.png')
             plt.show()
@@ -202,7 +202,7 @@ def analyze_server_software(db_file, limit=10):
             'Quick \'n Easy FTP Server': re.compile(r'Quick \'n Easy FTP Server', re.IGNORECASE),
             #'Generic': re.compile(r'(^220 FTP service ready\.$)|(^220 FTP S|server R|ready(\.)?$)|(^220 FTP Server$)|(^220 FTP-Server$)|(^220 Welcome! Please note that all activity is logged.$)|(^220 \.$)|(^220 Welcome to FTP service\.$)|(^220 FTP (OK)$)|(^220 Operation successful$)', re.IGNORECASE),
         }
-        
+
         conn = sqlite3.connect(db_file)
         cursor = conn.cursor()
 
@@ -213,33 +213,33 @@ def analyze_server_software(db_file, limit=10):
         # Count server software
         server_counts = {}
         unknown_count = 0
-        
+
         for (message,) in messages:
             if not message:
                 continue
-                
+
             detected = False
             for name, pattern in server_patterns.items():
                 if pattern.search(message):
                     server_counts[name] = server_counts.get(name, 0) + 1
                     detected = True
                     break
-            
+
             if not detected:
                 unknown_count += 1
                 #print(f"Unknown server banner: {message}")
 
         # Sort all servers by count
         sorted_servers = sorted(server_counts.items(), key=lambda x: x[1], reverse=True)
-        
+
         # Calculate combined Others/Unknown count
         others_unknown_count = unknown_count
-        
+
         # If we have more servers than limit, group the rest under Others/Unknown
         if len(sorted_servers) > limit:
             others_unknown_count += sum(count for _, count in sorted_servers[limit:])
             sorted_servers = sorted_servers[:limit]
-        
+
         # Add combined Others/Unknown category if there are any
         if others_unknown_count > 0:
             sorted_servers.append(('Others/Unknown', others_unknown_count))
@@ -255,7 +255,7 @@ def analyze_server_software(db_file, limit=10):
             # Generate pie chart with distinct colors
             servers, counts = zip(*sorted_servers)
             plt.figure(figsize=(10, 8))
-            
+
             # Use a colormap with enough distinct colors
             colors = plt.cm.tab20.colors  # tab20 colormap has 20 distinct colors
             if len(servers) > 20:
@@ -263,7 +263,7 @@ def analyze_server_software(db_file, limit=10):
                 colors = [colors[i % 20] for i in range(len(servers))]
             else:
                 colors = colors[:len(servers)]
-            
+
             # Create pie chart with labels
             # Create varied label positions to avoid overlap
             plt.pie(counts, labels=servers, autopct='%1.1f%%', startangle=140, colors=colors,
@@ -276,7 +276,7 @@ def analyze_server_software(db_file, limit=10):
             plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
             plt.subplots_adjust(top=0.85)  # Add more space above the chart
             plt.tight_layout()
-            
+
             # Save and show the plot
             plt.savefig('server_software.png')
             plt.show()
@@ -298,22 +298,22 @@ def detect_worm_infections(db_file):
 
         # Check for worm infection files using pattern matching
         query = """
-        SELECT 
+        SELECT
             SUM(CASE WHEN anon = 1 THEN 1 ELSE 0 END) AS anon_hosts,
             SUM(CASE WHEN anon = 1 AND (
-                        listing LIKE '%AV.scr%' OR 
-                        listing LIKE '%Photo.scr%' OR 
+                        listing LIKE '%AV.scr%' OR
+                        listing LIKE '%Photo.scr%' OR
                         listing LIKE '%Video.scr%' OR
                         listing LIKE '%AV.%.scr%' OR
                         listing LIKE '%Photo.%.scr%' OR
                         listing LIKE '%Video.%.scr%') THEN 1 ELSE 0 END) AS infected_hosts,
             ROUND(100.0 * SUM(CASE WHEN anon = 1 AND (
-                        listing LIKE '%AV.scr%' OR 
-                        listing LIKE '%Photo.scr%' OR 
+                        listing LIKE '%AV.scr%' OR
+                        listing LIKE '%Photo.scr%' OR
                         listing LIKE '%Video.scr%' OR
                         listing LIKE '%AV.%.scr%' OR
                         listing LIKE '%Photo.%.scr%' OR
-                        listing LIKE '%Video.%.scr%') THEN 1 ELSE 0 END) / 
+                        listing LIKE '%Video.%.scr%') THEN 1 ELSE 0 END) /
                   SUM(CASE WHEN anon = 1 THEN 1 ELSE 0 END), 2) AS infection_percent
         FROM ftp;
         """
@@ -324,27 +324,27 @@ def detect_worm_infections(db_file):
         if result:
             anon_hosts, infected_hosts, infection_percent = result
             non_infected_hosts = anon_hosts - infected_hosts
-            
+
             headers = ["Anonymous Hosts", "Infected Hosts", "Percentage"]
             data = [result]
-            print("\nWorm Infection Statistics:")
+            print("\nWorm.Python.Miner.gen Infection Statistics:")
             print(tabulate(data, headers=headers, tablefmt="pretty"))
 
             # Generate pie chart
             labels = ['Infected Hosts', 'Non-Infected Hosts']
             sizes = [infected_hosts, non_infected_hosts]
             colors = ['#ff9999','#66b3ff']
-            
+
             plt.figure(figsize=(8, 6))
             plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
                    startangle=90, textprops={'fontsize': 12},
                    wedgeprops={'linewidth': 1, 'edgecolor': 'white'})
-            
-            plt.title('Worm Infection Distribution Among Anonymous Hosts', 
+
+            plt.title('Worm.Python.Miner.gen Infection Distribution Among Anonymous Hosts',
                      fontsize=14, fontweight='bold', pad=20)
             plt.axis('equal')
             plt.tight_layout()
-            
+
             # Save and show the plot
             plt.savefig('worm_infections.png')
             plt.show()
@@ -366,7 +366,7 @@ def calculate_anonymous_access(db_file):
 
         # Execute the query to get statistics
         query = """
-        SELECT 
+        SELECT
             COUNT(*) AS total_hosts,
             SUM(CASE WHEN anon = 1 THEN 1 ELSE 0 END) AS anon_hosts,
             ROUND(100.0 * SUM(CASE WHEN anon = 1 THEN 1 ELSE 0 END) / COUNT(*), 2) AS anon_percent
@@ -379,7 +379,7 @@ def calculate_anonymous_access(db_file):
         if result:
             total_hosts, anon_hosts, anon_percent = result
             non_anon_hosts = total_hosts - anon_hosts
-            
+
             headers = ["Total Hosts", "Anonymous Hosts", "Percentage"]
             data = [result]
             print("\nAnonymous Access Statistics:")
@@ -389,17 +389,17 @@ def calculate_anonymous_access(db_file):
             labels = ['Anonymous Access', 'Non-Anonymous Access']
             sizes = [anon_hosts, non_anon_hosts]
             colors = ['#ff9999','#66b3ff']
-            
+
             plt.figure(figsize=(8, 6))
             plt.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
                    startangle=90, textprops={'fontsize': 12},
                    wedgeprops={'linewidth': 1, 'edgecolor': 'white'})
-            
-            plt.title('Anonymous Access Distribution', 
+
+            plt.title('Anonymous Access Distribution',
                      fontsize=14, fontweight='bold', pad=20)
             plt.axis('equal')
             plt.tight_layout()
-            
+
             # Save and show the plot
             plt.savefig('anonymous_access.png')
             plt.show()
