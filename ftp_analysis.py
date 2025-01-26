@@ -2,10 +2,22 @@
 import sqlite3
 import argparse
 import re
+import csv
 from tabulate import tabulate
 import matplotlib.pyplot as plt
 
-def analyze_welcome_messages(db_file, limit=10):
+def export_to_csv(data, headers, filename):
+    """Helper function to export data to CSV"""
+    try:
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(headers)
+            writer.writerows(data)
+        print(f"Data exported to {filename}")
+    except Exception as e:
+        print(f"Error exporting to CSV: {e}")
+
+def analyze_welcome_messages(db_file, limit=10, export_csv=False):
     """Analyze and display most common FTP welcome messages"""
     try:
         conn = sqlite3.connect(db_file)
@@ -28,6 +40,9 @@ def analyze_welcome_messages(db_file, limit=10):
             headers = ["Welcome Message", "Count"]
             print("\nMost Common Welcome Messages:")
             print(tabulate(results, headers=headers, tablefmt="pretty"))
+            
+            if export_csv:
+                export_to_csv(results, headers, 'welcome_messages.csv')
         else:
             print("No welcome messages found in the database.")
 
@@ -59,7 +74,7 @@ def load_ip2location_db(ip2location_file):
                     continue  # Skip malformed lines
     return ip_ranges
 
-def analyze_geographical_distribution(db_file, ip2location_file, limit=15):
+def analyze_geographical_distribution(db_file, ip2location_file, limit=15, export_csv=False):
     """Analyze and display geographical distribution using IP2Location"""
     conn = None
     try:
@@ -119,6 +134,9 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=15):
             headers = ["Country", "Host Count"]
             print(f"\nGeographical Distribution (Top {limit} Countries):")
             print(tabulate(sorted_countries, headers=headers, tablefmt="pretty"))
+            
+            if export_csv:
+                export_to_csv(sorted_countries, headers, 'geo_distribution.csv')
 
             # Generate pie chart with distinct colors
             countries, counts = zip(*sorted_countries)
@@ -156,7 +174,7 @@ def analyze_geographical_distribution(db_file, ip2location_file, limit=15):
         if conn:
             conn.close()
 
-def analyze_server_software(db_file, limit=10):
+def analyze_server_software(db_file, limit=10, export_csv=False):
     """Analyze and display server software breakdown"""
     try:
         # Common FTP server patterns
@@ -251,6 +269,9 @@ def analyze_server_software(db_file, limit=10):
             headers = ["Server Software", "Count"]
             print(f"\nServer Software Breakdown (Top {limit}):")
             print(tabulate(sorted_servers, headers=headers, tablefmt="pretty"))
+            
+            if export_csv:
+                export_to_csv(sorted_servers, headers, 'server_software.csv')
 
             # Generate pie chart with distinct colors
             servers, counts = zip(*sorted_servers)
@@ -289,7 +310,7 @@ def analyze_server_software(db_file, limit=10):
         if conn:
             conn.close()
 
-def detect_worm_infections(db_file):
+def detect_worm_infections(db_file, export_csv=False):
     """Detect and display statistics about potential worm infections"""
     try:
         # Connect to the SQLite database
@@ -329,6 +350,9 @@ def detect_worm_infections(db_file):
             data = [result]
             print("\nWorm.Python.Miner.gen Infection Statistics:")
             print(tabulate(data, headers=headers, tablefmt="pretty"))
+            
+            if export_csv:
+                export_to_csv(data, headers, 'worm_infections.csv')
 
             # Generate pie chart
             labels = ['Infected Hosts', 'Non-Infected Hosts']
@@ -357,7 +381,7 @@ def detect_worm_infections(db_file):
         if conn:
             conn.close()
 
-def calculate_anonymous_access(db_file):
+def calculate_anonymous_access(db_file, export_csv=False):
     """Calculate and display anonymous access statistics"""
     try:
         # Connect to the SQLite database
@@ -384,6 +408,9 @@ def calculate_anonymous_access(db_file):
             data = [result]
             print("\nAnonymous Access Statistics:")
             print(tabulate(data, headers=headers, tablefmt="pretty"))
+            
+            if export_csv:
+                export_to_csv(data, headers, 'anonymous_access.csv')
 
             # Generate pie chart
             labels = ['Anonymous Access', 'Non-Anonymous Access']
@@ -424,14 +451,16 @@ def main():
                        help="Path to IP2Location LITE DB1 CSV file")
     parser.add_argument("--software-limit", type=int, default=10,
                        help="Number of top server software to display (default: 10)")
+    parser.add_argument("--export-csv", action="store_true",
+                       help="Export all data to CSV files")
     args = parser.parse_args()
 
     # Calculate and display statistics
-    calculate_anonymous_access(args.database)
-    detect_worm_infections(args.database)
-    analyze_welcome_messages(args.database, args.welcome_limit)
-    analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit)
-    analyze_server_software(args.database, args.software_limit)
+    calculate_anonymous_access(args.database, args.export_csv)
+    detect_worm_infections(args.database, args.export_csv)
+    analyze_welcome_messages(args.database, args.welcome_limit, args.export_csv)
+    analyze_geographical_distribution(args.database, args.ip2location, args.geo_limit, args.export_csv)
+    analyze_server_software(args.database, args.software_limit, args.export_csv)
 
 if __name__ == "__main__":
     main()
